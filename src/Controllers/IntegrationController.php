@@ -17,7 +17,7 @@ class IntegrationController
     public function index(Request $request): Response
     {
         $userId = $_SESSION['user_id'] ?? null;
-        
+
         if (!$userId) {
             return Response::unauthorized();
         }
@@ -56,7 +56,7 @@ class IntegrationController
             "SELECT * FROM integration_accounts WHERE user_id = ?",
             [$userId]
         );
-        
+
         foreach ($accounts as $account) {
             foreach ($available as &$integration) {
                 if ($account['integration_id'] == $this->getIntegrationId($integration['slug'])) {
@@ -81,7 +81,7 @@ class IntegrationController
     public function auth(Request $request): Response
     {
         $service = $request->getParam('service');
-        
+
         // Configurazione OAuth per ogni servizio
         $configs = [
             'google_calendar' => [
@@ -103,18 +103,18 @@ class IntegrationController
                 'scopes' => '',
             ],
         ];
-        
+
         if (!isset($configs[$service])) {
             return Response::error('Servizio non supportato: ' . $service, 400);
         }
 
         $config = $configs[$service];
-        
+
         // Genera state per sicurezza
         $state = bin2hex(random_bytes(16));
         $_SESSION['oauth_state'] = $state;
         $_SESSION['oauth_service'] = $service;
-        
+
         // Costruisci URL OAuth
         $params = [
             'client_id' => $config['client_id'],
@@ -124,7 +124,7 @@ class IntegrationController
             'access_type' => 'offline',
             'prompt' => 'consent',
         ];
-        
+
         if (!empty($config['scopes'])) {
             $params['scope'] = $config['scopes'];
         }
@@ -145,13 +145,13 @@ class IntegrationController
         $code = $request->getQuery('code');
         $state = $request->getQuery('state');
         $error = $request->getQuery('error');
-        
+
         // Gestisci errori OAuth
         if ($error) {
             header('Location: ' . $this->getBaseUrl() . '/?error=' . urlencode($error));
             exit;
         }
-        
+
         // Verifica state
         if ($state !== ($_SESSION['oauth_state'] ?? '')) {
             header('Location: ' . $this->getBaseUrl() . '/?error=invalid_state');
@@ -161,10 +161,10 @@ class IntegrationController
         // TODO: Scambia code per access token
         // Per ora salva un account demo
         $userId = $_SESSION['user_id'] ?? null;
-        
+
         if ($userId && $code) {
             $db = Database::getInstance();
-            
+
             // Inserisci account (demo)
             $db->query(
                 "INSERT INTO integration_accounts (user_id, integration_id, account_name, account_email, access_token, sync_enabled, created_at, updated_at) 
@@ -194,13 +194,13 @@ class IntegrationController
     {
         $accountId = $request->getParam('accountId');
         $userId = $_SESSION['user_id'] ?? null;
-        
+
         $db = Database::getInstance();
         $account = $db->selectOne(
             "SELECT * FROM integration_accounts WHERE id = ? AND user_id = ?",
             [$accountId, $userId]
         );
-        
+
         if (!$account) {
             return Response::notFound('Account non trovato');
         }
@@ -220,13 +220,13 @@ class IntegrationController
     {
         $accountId = $request->getParam('accountId');
         $userId = $_SESSION['user_id'] ?? null;
-        
+
         $db = Database::getInstance();
         $account = $db->selectOne(
             "SELECT * FROM integration_accounts WHERE id = ? AND user_id = ?",
             [$accountId, $userId]
         );
-        
+
         if (!$account) {
             return Response::notFound('Account non trovato');
         }
@@ -248,7 +248,7 @@ class IntegrationController
         ];
         return $map[$slug] ?? 0;
     }
-    
+
     /**
      * Helper per ottenere base URL
      */
@@ -256,10 +256,10 @@ class IntegrationController
     {
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        
+
         $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
         $basePath = dirname($scriptName);
-        
+
         return $protocol . '://' . $host . $basePath;
     }
 }

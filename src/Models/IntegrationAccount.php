@@ -8,7 +8,7 @@ namespace FreelanceHub\Models;
 class IntegrationAccount extends Model
 {
     protected static string $table = 'integration_accounts';
-    
+
     protected static array $fillable = [
         'user_id',
         'integration_id',
@@ -40,7 +40,7 @@ class IntegrationAccount extends Model
                 JOIN integrations i ON ia.integration_id = i.id
                 WHERE ia.user_id = ? AND i.slug = ? AND ia.is_active = 1
                 ORDER BY ia.account_name ASC";
-        
+
         return static::query($sql, [$userId, $integrationSlug]);
     }
 
@@ -54,7 +54,7 @@ class IntegrationAccount extends Model
                 JOIN integrations i ON ia.integration_id = i.id
                 WHERE ia.user_id = ? AND ia.is_active = 1
                 ORDER BY i.name ASC, ia.account_name ASC";
-        
+
         return static::query($sql, [$userId]);
     }
 
@@ -71,7 +71,7 @@ class IntegrationAccount extends Model
                 AND (ia.last_sync_at IS NULL 
                      OR ia.last_sync_at < DATE_SUB(NOW(), INTERVAL ? MINUTE))
                 ORDER BY ia.last_sync_at ASC";
-        
+
         return static::query($sql, [$intervalMinutes]);
     }
 
@@ -204,7 +204,7 @@ class IntegrationAccount extends Model
     /**
      * Ottieni un valore specifico da extra_data
      */
-    public function getExtraValue(string $key, $default = null)
+    public function getExtraValue(string $key, mixed $default = null): mixed
     {
         $data = $this->getExtraData();
         return $data[$key] ?? $default;

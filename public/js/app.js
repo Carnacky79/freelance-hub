@@ -6,7 +6,7 @@
 // API Helper
 const api = {
     baseUrl: './api/v1',
-    
+
     async request(method, endpoint, data = null) {
         const options = {
             method,
@@ -15,21 +15,21 @@ const api = {
                 'Accept': 'application/json',
             },
         };
-        
+
         if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
             options.body = JSON.stringify(data);
         }
-        
+
         const response = await fetch(this.baseUrl + endpoint, options);
         const json = await response.json();
-        
+
         if (!response.ok) {
             throw new Error(json.message || 'Errore API');
         }
-        
+
         return json;
     },
-    
+
     get: (endpoint) => api.request('GET', endpoint),
     post: (endpoint, data) => api.request('POST', endpoint, data),
     put: (endpoint, data) => api.request('PUT', endpoint, data),
@@ -49,7 +49,7 @@ function app() {
         timeEntries: [],
         integrations: [],
         aiSuggestions: [],
-        
+
         // Page title
         get pageTitle() {
             const titles = {
@@ -64,7 +64,7 @@ function app() {
             };
             return titles[this.currentPage] || 'Dashboard';
         },
-        
+
         // Logout
         async logout() {
             try {
@@ -75,7 +75,7 @@ function app() {
                 window.location.href = './login';
             }
         },
-        
+
         // Timer
         runningTimer: null,
         timerInterval: null,
@@ -85,13 +85,13 @@ function app() {
             description: '',
             is_billable: true,
         },
-        
+
         // Modals
         showTaskModal: false,
         showClientModal: false,
         editingTask: null,
         editingClient: null,
-        
+
         // Forms
         taskForm: {
             title: '',
@@ -102,7 +102,7 @@ function app() {
             due_date: '',
             estimated_minutes: '',
         },
-        
+
         clientForm: {
             name: '',
             email: '',
@@ -112,26 +112,26 @@ function app() {
             hourly_rate: '',
             color: '#3B82F6',
         },
-        
+
         // Calendar
         calendar: null,
-        
+
         // Init
         async init() {
             await this.loadDashboard();
             await this.checkRunningTimer();
-            
+
             // Aggiorna timer ogni secondo
             this.timerInterval = setInterval(() => {
                 if (this.runningTimer) {
                     this.runningTimer.current_duration += 1/60;
                 }
             }, 1000);
-            
+
             // Polling timer ogni 30 secondi
             setInterval(() => this.checkRunningTimer(), 30000);
         },
-        
+
         // Dashboard
         async loadDashboard() {
             try {
@@ -145,7 +145,7 @@ function app() {
                 this.loading = false;
             }
         },
-        
+
         // Tasks
         async loadTasks() {
             try {
@@ -158,7 +158,7 @@ function app() {
                 this.loading = false;
             }
         },
-        
+
         async saveTask() {
             try {
                 if (this.editingTask) {
@@ -174,7 +174,7 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         async deleteTask(id) {
             if (!confirm('Eliminare questo task?')) return;
             try {
@@ -185,7 +185,7 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         async completeTask(id) {
             try {
                 await api.post(`/tasks/${id}/complete`);
@@ -195,13 +195,13 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         editTask(task) {
             this.editingTask = task;
             this.taskForm = { ...task };
             this.showTaskModal = true;
         },
-        
+
         resetTaskForm() {
             this.editingTask = null;
             this.taskForm = {
@@ -214,7 +214,7 @@ function app() {
                 estimated_minutes: '',
             };
         },
-        
+
         // Clients
         async loadClients() {
             try {
@@ -227,7 +227,7 @@ function app() {
                 this.loading = false;
             }
         },
-        
+
         async saveClient() {
             try {
                 if (this.editingClient) {
@@ -242,7 +242,7 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         resetClientForm() {
             this.editingClient = null;
             this.clientForm = {
@@ -255,7 +255,7 @@ function app() {
                 color: '#3B82F6',
             };
         },
-        
+
         // Time Tracking
         async checkRunningTimer() {
             try {
@@ -265,7 +265,7 @@ function app() {
                 this.runningTimer = null;
             }
         },
-        
+
         async startTimer() {
             try {
                 await api.post('/time-entries/start', this.newTimer);
@@ -276,7 +276,7 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         async stopTimer() {
             try {
                 await api.post('/time-entries/stop');
@@ -286,14 +286,14 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         startTimerForTask(task) {
             this.newTimer.task_id = task.id;
             this.newTimer.description = task.title;
             this.newTimer.is_billable = true;
             this.startTimer();
         },
-        
+
         async toggleTaskComplete(task) {
             try {
                 if (task.status === 'completed') {
@@ -307,7 +307,7 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         async loadTimeEntries(filters = {}) {
             try {
                 const params = new URLSearchParams(filters).toString();
@@ -317,7 +317,7 @@ function app() {
                 console.error('Errore caricamento time entries:', error);
             }
         },
-        
+
         // AI Suggestions
         async acceptSuggestion(id) {
             try {
@@ -327,7 +327,7 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         async dismissSuggestion(id) {
             try {
                 await api.post(`/ai/suggestions/${id}/dismiss`);
@@ -336,7 +336,7 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         // Integrations
         async loadIntegrations() {
             try {
@@ -346,11 +346,11 @@ function app() {
                 console.error('Errore caricamento integrazioni:', error);
             }
         },
-        
+
         connectIntegration(service) {
             window.location.href = `./api/v1/integrations/${service}/auth`;
         },
-        
+
         async syncIntegration(accountId) {
             try {
                 await api.post(`/integrations/${accountId}/sync`);
@@ -359,7 +359,7 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         async disconnectIntegration(accountId) {
             if (!confirm('Disconnettere questo account?')) return;
             try {
@@ -369,18 +369,18 @@ function app() {
                 alert('Errore: ' + error.message);
             }
         },
-        
+
         // Calendar
         initCalendar() {
             const calendarEl = document.getElementById('calendar');
             if (!calendarEl) return;
-            
+
             // Distruggi il calendario precedente se esiste
             if (this.calendar) {
                 this.calendar.destroy();
                 this.calendar = null;
             }
-            
+
             this.calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'it',
@@ -418,10 +418,10 @@ function app() {
                     }
                 },
             });
-            
+
             this.calendar.render();
         },
-        
+
         // Helpers
         formatDuration(minutes) {
             if (!minutes) return '0:00';
@@ -430,17 +430,17 @@ function app() {
             const s = Math.floor((minutes * 60) % 60);
             return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         },
-        
+
         formatDate(dateStr) {
             if (!dateStr) return '';
             return new Date(dateStr).toLocaleDateString('it-IT');
         },
-        
+
         formatDateTime(dateStr) {
             if (!dateStr) return '';
             return new Date(dateStr).toLocaleString('it-IT');
         },
-        
+
         priorityClass(priority) {
             const classes = {
                 urgent: 'bg-red-100 text-red-700',
@@ -451,7 +451,7 @@ function app() {
             };
             return classes[priority] || classes.normal;
         },
-        
+
         statusClass(status) {
             const classes = {
                 backlog: 'bg-gray-100 text-gray-700',
@@ -463,11 +463,11 @@ function app() {
             };
             return classes[status] || classes.todo;
         },
-        
+
         // Page Navigation
         async goToPage(page) {
             this.currentPage = page;
-            
+
             switch (page) {
                 case 'dashboard':
                     await this.loadDashboard();
@@ -492,7 +492,7 @@ function app() {
                     break;
             }
         },
-        
+
         async loadProjects() {
             try {
                 const response = await api.get('/projects');

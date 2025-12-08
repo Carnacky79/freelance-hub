@@ -8,7 +8,7 @@ namespace FreelanceHub\Models;
 class Client extends Model
 {
     protected static string $table = 'clients';
-    
+
     protected static array $fillable = [
         'user_id',
         'name',
@@ -38,13 +38,13 @@ class Client extends Model
                     (SELECT COUNT(*) FROM tasks WHERE client_id = c.id AND status NOT IN ('completed', 'cancelled')) as open_tasks_count
                 FROM clients c 
                 WHERE c.user_id = ?";
-        
+
         if ($activeOnly) {
             $sql .= " AND c.is_active = 1";
         }
-        
+
         $sql .= " ORDER BY c.priority_level DESC, c.name ASC";
-        
+
         return static::query($sql, [$userId]);
     }
 
@@ -80,7 +80,7 @@ class Client extends Model
     /**
      * Time entries del cliente
      */
-    public function timeEntries(string $from = null, string $to = null): array
+    public function timeEntries(?string $from = null, ?string $to = null): array
     {
         $sql = "SELECT te.*, t.title as task_title 
                 FROM time_entries te
@@ -105,7 +105,7 @@ class Client extends Model
     /**
      * Totale ore tracciate
      */
-    public function totalTrackedHours(string $from = null, string $to = null): float
+    public function totalTrackedHours(?string $from = null, ?string $to = null): float
     {
         $sql = "SELECT SUM(duration_minutes) as total FROM time_entries WHERE client_id = ?";
         $params = [$this->getId()];
@@ -126,7 +126,7 @@ class Client extends Model
     /**
      * Totale fatturabile
      */
-    public function totalBillable(string $from = null, string $to = null): float
+    public function totalBillable(?string $from = null, ?string $to = null): float
     {
         $sql = "SELECT SUM(duration_minutes * COALESCE(te.hourly_rate, 0) / 60) as total 
                 FROM time_entries te
@@ -154,7 +154,7 @@ class Client extends Model
         if ($this->hourly_rate) {
             return (float)$this->hourly_rate;
         }
-        
+
         $user = User::find($this->user_id);
         return $user ? (float)$user->default_hourly_rate : 0;
     }

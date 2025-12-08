@@ -28,32 +28,32 @@ class Request
     {
         $path = $_SERVER['REQUEST_URI'] ?? '/';
         $path = parse_url($path, PHP_URL_PATH);
-        
+
         // Rimuovi il base path se l'app è in una sottocartella
         $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
         $basePath = dirname($scriptName);
-        
+
         if ($basePath !== '/' && $basePath !== '\\' && strpos($path, $basePath) === 0) {
             $path = substr($path, strlen($basePath));
         }
-        
+
         // Assicurati che il path inizi con /
         if (empty($path) || $path[0] !== '/') {
             $path = '/' . $path;
         }
-        
+
         return $path ?: '/';
     }
 
     private function parseBody(): array
     {
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-        
+
         if (str_contains($contentType, 'application/json')) {
             $input = file_get_contents('php://input');
             return json_decode($input, true) ?? [];
         }
-        
+
         return $_POST;
     }
 
@@ -79,7 +79,7 @@ class Request
         return $this->path;
     }
 
-    public function getQuery(string $key = null, $default = null)
+    public function getQuery(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->query;
@@ -87,7 +87,7 @@ class Request
         return $this->query[$key] ?? $default;
     }
 
-    public function getBody(string $key = null, $default = null)
+    public function getBody(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->body;
@@ -95,7 +95,7 @@ class Request
         return $this->body[$key] ?? $default;
     }
 
-    public function input(string $key, $default = null)
+    public function input(string $key, mixed $default = null): mixed
     {
         return $this->body[$key] ?? $this->query[$key] ?? $default;
     }
@@ -105,7 +105,7 @@ class Request
         return array_merge($this->query, $this->body);
     }
 
-    public function getHeader(string $name, $default = null): ?string
+    public function getHeader(string $name, mixed $default = null): ?string
     {
         $name = strtoupper(str_replace('-', '_', $name));
         return $this->headers[$name] ?? $default;
@@ -125,7 +125,7 @@ class Request
         $this->params = $params;
     }
 
-    public function getParam(string $key, $default = null)
+    public function getParam(string $key, mixed $default = null): mixed
     {
         return $this->params[$key] ?? $default;
     }
@@ -181,7 +181,7 @@ class Request
         return $errors;
     }
 
-    private function validateRule(string $field, $value, string $rule): ?string
+    private function validateRule(string $field, mixed $value, string $rule): ?string
     {
         $parts = explode(':', $rule);
         $ruleName = $parts[0];
@@ -190,10 +190,10 @@ class Request
         return match ($ruleName) {
             'required' => empty($value) && $value !== '0' ? "{$field} is required" : null,
             'email' => $value && !filter_var($value, FILTER_VALIDATE_EMAIL) ? "{$field} must be a valid email" : null,
-            'min' => $value && strlen($value) < (int)$ruleParam ? "{$field} must be at least {$ruleParam} characters" : null,
-            'max' => $value && strlen($value) > (int)$ruleParam ? "{$field} must not exceed {$ruleParam} characters" : null,
+            'min' => $value && strlen((string)$value) < (int)$ruleParam ? "{$field} must be at least {$ruleParam} characters" : null,
+            'max' => $value && strlen((string)$value) > (int)$ruleParam ? "{$field} must not exceed {$ruleParam} characters" : null,
             'numeric' => $value && !is_numeric($value) ? "{$field} must be numeric" : null,
-            'date' => $value && !strtotime($value) ? "{$field} must be a valid date" : null,
+            'date' => $value && !strtotime((string)$value) ? "{$field} must be a valid date" : null,
             default => null,
         };
     }

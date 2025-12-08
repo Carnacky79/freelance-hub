@@ -226,4 +226,29 @@ class Request
             default => null,
         };
     }
+
+    /**
+     * Ottiene un valore dalla sessione
+     */
+    public function session($key, $default = null)
+    {
+        return $_SESSION[$key] ?? $default;
+    }
+
+    /**
+     * Imposta un valore nella sessione
+     */
+    public function setSession($key, $value)
+    {
+        $_SESSION[$key] = $value;
+    }
+
+    /**
+     * Distruggi sessione
+     */
+    public function destroySession()
+    {
+        session_destroy();
+        $_SESSION = [];
+    }
 }

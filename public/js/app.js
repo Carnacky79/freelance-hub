@@ -65,6 +65,23 @@ function app() {
         integrations: [],
         aiSuggestions: [],
 
+        settingsLoading: false,
+        settingsSaved: false,
+        userProfile: {
+            name: '',
+            email: '',
+        },
+        userPreferences: {
+            email_notifications: true,
+            ai_suggestions: true,
+            dark_mode: false,
+        },
+        passwordForm: {
+            current_password: '',
+            new_password: '',
+            confirm_password: '',
+        },
+
         // Page title
         get pageTitle() {
             const titles = {
@@ -130,25 +147,6 @@ function app() {
 
         // Calendar
         calendar: null,
-
-        // State per settings
-        userProfile: {
-            name: '',
-            email: '',
-            timezone: 'Europe/Rome',
-        },
-
-        passwordForm: {
-            current_password: '',
-            new_password: '',
-            confirm_password: '',
-        },
-
-        userPreferences: {
-            language: 'it',
-            notifications_email: true,
-            auto_start_timer: false,
-        },
 
         // Init
         async init() {
@@ -610,9 +608,38 @@ function app() {
         async savePreferences() {
             try {
                 await api.put('/settings/preferences', this.userPreferences);
+                this.settingsSaved = true;
+                setTimeout(() => this.settingsSaved = false, 3000);
                 alert('Preferenze salvate!');
             } catch (error) {
                 alert('Errore: ' + error.message);
+            }
+        },
+
+// Toggle singola preferenza (per i switch)
+        async togglePreference(key) {
+            try {
+                // Aggiorna immediatamente l'UI
+                this.userPreferences[key] = !this.userPreferences[key];
+
+                // Salva automaticamente su server
+                await api.put('/settings/preferences', this.userPreferences);
+
+                console.log(`✅ Preferenza ${key} salvata:`, this.userPreferences[key]);
+
+                // Mostra feedback
+                this.settingsSaved = true;
+                setTimeout(() => this.settingsSaved = false, 2000);
+
+                // Applica tema scuro se necessario
+                if (key === 'dark_mode') {
+                    document.documentElement.classList.toggle('dark', this.userPreferences.dark_mode);
+                }
+            } catch (error) {
+                // Rollback se errore
+                this.userPreferences[key] = !this.userPreferences[key];
+                alert('Errore nel salvataggio: ' + error.message);
+                console.error('Errore toggle:', error);
             }
         },
 

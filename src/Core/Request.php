@@ -181,7 +181,24 @@ class Request
         return $errors;
     }
 
-    private function validateRule(string $field, mixed $value, string $rule): ?string
+//    private function validateRule(string $field, mixed $value, string $rule): ?string
+//    {
+//        $parts = explode(':', $rule);
+//        $ruleName = $parts[0];
+//        $ruleParam = $parts[1] ?? null;
+//
+//        return match ($ruleName) {
+//            'required' => empty($value) && $value !== '0' ? "{$field} is required" : null,
+//            'email' => $value && !filter_var($value, FILTER_VALIDATE_EMAIL) ? "{$field} must be a valid email" : null,
+//            'min' => $value && strlen((string)$value) < (int)$ruleParam ? "{$field} must be at least {$ruleParam} characters" : null,
+//            'max' => $value && strlen((string)$value) > (int)$ruleParam ? "{$field} must not exceed {$ruleParam} characters" : null,
+//            'numeric' => $value && !is_numeric($value) ? "{$field} must be numeric" : null,
+//            'date' => $value && !strtotime((string)$value) ? "{$field} must be a valid date" : null,
+//            default => null,
+//        };
+//    }
+
+    private function validateRule(string $field, $value, string $rule): ?string
     {
         $parts = explode(':', $rule);
         $ruleName = $parts[0];
@@ -190,10 +207,22 @@ class Request
         return match ($ruleName) {
             'required' => empty($value) && $value !== '0' ? "{$field} is required" : null,
             'email' => $value && !filter_var($value, FILTER_VALIDATE_EMAIL) ? "{$field} must be a valid email" : null,
-            'min' => $value && strlen((string)$value) < (int)$ruleParam ? "{$field} must be at least {$ruleParam} characters" : null,
-            'max' => $value && strlen((string)$value) > (int)$ruleParam ? "{$field} must not exceed {$ruleParam} characters" : null,
+            'min' => $value && strlen($value) < (int)$ruleParam ? "{$field} must be at least {$ruleParam} characters" : null,
+            'max' => $value && strlen($value) > (int)$ruleParam ? "{$field} must not exceed {$ruleParam} characters" : null,
             'numeric' => $value && !is_numeric($value) ? "{$field} must be numeric" : null,
-            'date' => $value && !strtotime((string)$value) ? "{$field} must be a valid date" : null,
+            'integer' => $value && !filter_var($value, FILTER_VALIDATE_INT) ? "{$field} must be an integer" : null,
+            'date' => $value && !strtotime($value) ? "{$field} must be a valid date" : null,
+            'url' => $value && !filter_var($value, FILTER_VALIDATE_URL) ? "{$field} must be a valid URL" : null,
+            // ⭐ NUOVE REGOLE
+            'alpha' => $value && !ctype_alpha($value) ? "{$field} must contain only letters" : null,
+            'alpha_num' => $value && !ctype_alnum($value) ? "{$field} must contain only letters and numbers" : null,
+            'in' => $value && !in_array($value, explode(',', $ruleParam)) ? "{$field} must be one of: {$ruleParam}" : null,
+            'between' => function() use ($value, $ruleParam, $field) {
+                if (!$value) return null;
+                [$min, $max] = explode(',', $ruleParam);
+                $len = strlen($value);
+                return ($len < $min || $len > $max) ? "{$field} must be between {$min} and {$max} characters" : null;
+            },
             default => null,
         };
     }

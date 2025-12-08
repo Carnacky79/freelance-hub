@@ -535,94 +535,244 @@
             </div>
 
             <!-- Settings -->
-            <div x-show="currentPage === 'settings'" class="animate-fade-in">
-                <div class="grid gap-6">
-                    <!-- Profilo -->
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                            Profilo
-                        </h3>
-                        <div class="grid gap-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-20 h-20 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                                    <?= strtoupper(substr($user['name'] ?? 'U', 0, 1)) ?>
-                                </div>
-                                <div>
-                                    <h4 class="text-lg font-semibold text-gray-800"><?= htmlspecialchars($user['name'] ?? 'Utente') ?></h4>
-                                    <p class="text-gray-500"><?= htmlspecialchars($user['email'] ?? '') ?></p>
-                                </div>
+            <div x-show="currentPage === 'settings'" class="max-w-4xl mx-auto space-y-6">
+
+                <!-- Loading State -->
+                <div x-show="settingsLoading" class="text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="mt-2 text-gray-600">Caricamento...</p>
+                </div>
+
+                <!-- Success Message -->
+                <div x-show="settingsSaved"
+                     x-transition
+                     class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center"
+                >
+                    <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-green-800 font-medium">Modifiche salvate con successo!</span>
+                </div>
+
+                <div x-show="!settingsLoading">
+                    <!-- Header -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-600">
+                        <h1 class="text-2xl font-bold text-gray-800">Impostazioni</h1>
+                        <p class="text-sm text-gray-600 mt-1">Benvenuto, <span x-text="userProfile.name"></span></p>
+                    </div>
+
+                    <!-- Profilo Section -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center mb-6">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <h2 class="text-lg font-semibold text-gray-800">Profilo</h2>
+                        </div>
+
+                        <!-- Avatar -->
+                        <div class="mb-6 flex items-center">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                                <span x-text="userProfile.name ? userProfile.name.charAt(0).toUpperCase() : 'U'"></span>
                             </div>
-                            <div class="border-t pt-4 grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                                    <input type="text" class="input" value="<?= htmlspecialchars($user['name'] ?? '') ?>" disabled>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                    <input type="email" class="input" value="<?= htmlspecialchars($user['email'] ?? '') ?>" disabled>
-                                </div>
+                            <div class="ml-4">
+                                <h3 class="font-semibold text-gray-800" x-text="userProfile.name"></h3>
+                                <p class="text-sm text-gray-600" x-text="userProfile.email"></p>
                             </div>
-                            <p class="text-sm text-gray-400">La modifica del profilo sarà disponibile prossimamente.</p>
+                        </div>
+
+                        <!-- Form Profilo -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nome</label>
+                                <input
+                                        type="text"
+                                        x-model="userProfile.name"
+                                        @keyup.enter="saveProfile()"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                        placeholder="Il tuo nome"
+                                >
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input
+                                        type="email"
+                                        x-model="userProfile.email"
+                                        @keyup.enter="saveProfile()"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                        placeholder="email@example.com"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Pulsante Salva Profilo -->
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                            <p class="text-sm text-gray-500">
+                                Premi Invio o clicca Salva per confermare le modifiche
+                            </p>
+                            <button
+                                    @click="saveProfile()"
+                                    :disabled="settingsLoading"
+                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                            >
+                                <span x-show="!settingsLoading">Salva Profilo</span>
+                                <span x-show="settingsLoading">Salvataggio...</span>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Preferenze -->
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                            Preferenze
-                        </h3>
+                    <!-- Preferenze Section -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center mb-6">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                            </svg>
+                            <h2 class="text-lg font-semibold text-gray-800">Preferenze</h2>
+                        </div>
+
+                        <!-- Toggle Preferences -->
                         <div class="space-y-4">
-                            <div class="flex items-center justify-between py-3 border-b">
-                                <div>
-                                    <h4 class="font-medium text-gray-800">Notifiche Email</h4>
-                                    <p class="text-sm text-gray-500">Ricevi email per task in scadenza</p>
+                            <!-- Notifiche Email -->
+                            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-800">Notifiche Email</h3>
+                                    <p class="text-sm text-gray-600">Ricevi email per task in scadenza</p>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" checked disabled>
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                                </label>
+                                <button
+                                        @click="togglePreference('email_notifications')"
+                                        type="button"
+                                        :class="userPreferences.email_notifications ? 'bg-blue-600' : 'bg-gray-300'"
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        role="switch"
+                                >
+                        <span
+                                :class="userPreferences.email_notifications ? 'translate-x-5' : 'translate-x-0'"
+                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                        ></span>
+                                </button>
                             </div>
-                            <div class="flex items-center justify-between py-3 border-b">
-                                <div>
-                                    <h4 class="font-medium text-gray-800">Suggerimenti AI</h4>
-                                    <p class="text-sm text-gray-500">Mostra suggerimenti intelligenti</p>
+
+                            <!-- Suggerimenti AI -->
+                            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-800">Suggerimenti AI</h3>
+                                    <p class="text-sm text-gray-600">Mostra suggerimenti intelligenti</p>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" checked disabled>
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                                </label>
+                                <button
+                                        @click="togglePreference('ai_suggestions')"
+                                        type="button"
+                                        :class="userPreferences.ai_suggestions ? 'bg-blue-600' : 'bg-gray-300'"
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        role="switch"
+                                >
+                        <span
+                                :class="userPreferences.ai_suggestions ? 'translate-x-5' : 'translate-x-0'"
+                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                        ></span>
+                                </button>
                             </div>
+
+                            <!-- Tema Scuro -->
                             <div class="flex items-center justify-between py-3">
-                                <div>
-                                    <h4 class="font-medium text-gray-800">Tema Scuro</h4>
-                                    <p class="text-sm text-gray-500">Modalità scura per l'interfaccia</p>
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-800">Tema Scuro</h3>
+                                    <p class="text-sm text-gray-600">Modalità scura per l'interfaccia</p>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" disabled>
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                                </label>
+                                <button
+                                        @click="togglePreference('dark_mode')"
+                                        type="button"
+                                        :class="userPreferences.dark_mode ? 'bg-blue-600' : 'bg-gray-300'"
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        role="switch"
+                                >
+                        <span
+                                :class="userPreferences.dark_mode ? 'translate-x-5' : 'translate-x-0'"
+                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                        ></span>
+                                </button>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-400 mt-4">Le preferenze saranno salvabili prossimamente.</p>
+
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-sm text-gray-500">
+                                Le preferenze vengono salvate automaticamente
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Sicurezza Section -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center mb-6">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            <h2 class="text-lg font-semibold text-gray-800">Sicurezza</h2>
+                        </div>
+
+                        <!-- Form Cambio Password -->
+                        <form @submit.prevent="changePassword()" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password Attuale</label>
+                                <input
+                                        type="password"
+                                        x-model="passwordForm.current_password"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="••••••••"
+                                >
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nuova Password</label>
+                                <input
+                                        type="password"
+                                        x-model="passwordForm.new_password"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="••••••••"
+                                >
+                                <p class="text-xs text-gray-500 mt-1">Minimo 8 caratteri</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Conferma Nuova Password</label>
+                                <input
+                                        type="password"
+                                        x-model="passwordForm.confirm_password"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="••••••••"
+                                >
+                            </div>
+
+                            <button
+                                    type="submit"
+                                    :disabled="settingsLoading"
+                                    class="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                            >
+                                Cambia Password
+                            </button>
+                        </form>
                     </div>
 
                     <!-- Danger Zone -->
-                    <div class="card border-red-200 bg-red-50/50">
-                        <h3 class="text-lg font-semibold text-red-800 mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                            Zona Pericolosa
-                        </h3>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h4 class="font-medium text-gray-800">Elimina Account</h4>
-                                <p class="text-sm text-gray-500">Elimina permanentemente il tuo account e tutti i dati</p>
-                            </div>
-                            <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium" disabled>
-                                Elimina Account
-                            </button>
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                        <div class="flex items-center mb-4">
+                            <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <h2 class="text-lg font-semibold text-red-800">Zona Pericolosa</h2>
                         </div>
+
+                        <p class="text-sm text-red-600 mb-4">
+                            L'eliminazione dell'account è <strong>permanente</strong> e <strong>non può essere annullata</strong>.
+                            Tutti i tuoi dati verranno cancellati definitivamente.
+                        </p>
+
+                        <button
+                                @click="deleteAccount()"
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                        >
+                            Elimina Account
+                        </button>
                     </div>
                 </div>
             </div>

@@ -16,6 +16,9 @@
         </div>
         
         <form id="loginForm" class="space-y-6">
+            <?php if (session_status() === PHP_SESSION_ACTIVE): ?>
+                <input type="hidden" name="csrf_token" value="<?= \FreelanceHub\Core\Session::generateCSRFToken() ?>">
+            <?php endif; ?>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input type="email" name="email" required 

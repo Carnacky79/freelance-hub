@@ -16,6 +16,9 @@
         </div>
         
         <form id="registerForm" class="space-y-5">
+            <?php if (session_status() === PHP_SESSION_ACTIVE): ?>
+                <input type="hidden" name="csrf_token" value="<?= \FreelanceHub\Core\Session::generateCSRFToken() ?>">
+            <?php endif; ?>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
                 <input type="text" name="name" required 

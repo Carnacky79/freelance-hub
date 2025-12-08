@@ -13,6 +13,7 @@ const api = {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'X-CSRF-TOKEN': this.getCsrfToken(), // ⭐ AGGIUNGI QUESTO
             },
         };
 
@@ -30,11 +31,25 @@ const api = {
         return json;
     },
 
+    getCsrfToken() {
+        // Ottieni token dalla risposta /api/test
+        if (!this._csrfToken) {
+            fetch('./api/test')
+                .then(r => r.json())
+                .then(data => this._csrfToken = data.csrf_token);
+        }
+        return this._csrfToken || '';
+    },
+
     get: (endpoint) => api.request('GET', endpoint),
     post: (endpoint, data) => api.request('POST', endpoint, data),
     put: (endpoint, data) => api.request('PUT', endpoint, data),
     delete: (endpoint) => api.request('DELETE', endpoint),
 };
+
+document.addEventListener('DOMContentLoaded', () => {
+    api.getCsrfToken();
+});
 
 // Main App Component
 function app() {
@@ -116,20 +131,45 @@ function app() {
         // Calendar
         calendar: null,
 
+        // State per settings
+        userProfile: {
+            name: '',
+            email: '',
+            timezone: 'Europe/Rome',
+        },
+
+        passwordForm: {
+            current_password: '',
+            new_password: '',
+            confirm_password: '',
+        },
+
+        userPreferences: {
+            language: 'it',
+            notifications_email: true,
+            auto_start_timer: false,
+        },
+
         // Init
         async init() {
             await this.loadDashboard();
             await this.checkRunningTimer();
 
-            // Aggiorna timer ogni secondo
             this.timerInterval = setInterval(() => {
-                if (this.runningTimer) {
-                    this.runningTimer.current_duration += 1/60;
+                if (this.runningTimer && this.runningTimer.start_time) {
+                    const elapsed = (Date.now() - new Date(this.runningTimer.start_time).getTime()) / 1000;
+                    this.runningTimer.elapsed = elapsed;
                 }
             }, 1000);
 
-            // Polling timer ogni 30 secondi
             setInterval(() => this.checkRunningTimer(), 30000);
+        },
+
+        destroy() {
+            if (this.timerInterval) {
+                clearInterval(this.timerInterval);
+                this.timerInterval = null;
+            }
         },
 
         // Dashboard
@@ -490,6 +530,9 @@ function app() {
                 case 'integrations':
                     await this.loadIntegrations();
                     break;
+                case 'settings':
+                    await this.loadUserSettings(); // <-- AGGIUNTO
+                    break;
             }
         },
 
@@ -501,6 +544,97 @@ function app() {
                 console.error('Errore caricamento progetti:', error);
             }
         },
+
+
+
+// Carica dati utente
+        async loadUserSettings() {
+            try {
+                const response = await api.get('/settings');
+                this.userProfile = {
+                    name: response.data.name,
+                    email: response.data.email,
+                    timezone: response.data.timezone || 'Europe/Rome',
+                };
+
+                // Carica preferenze se presenti
+                if (response.data.preferences) {
+                    const prefs = typeof response.data.preferences === 'string'
+                        ? JSON.parse(response.data.preferences)
+                        : response.data.preferences;
+                    this.userPreferences = { ...this.userPreferences, ...prefs };
+                }
+            } catch (error) {
+                console.error('Errore caricamento settings:', error);
+            }
+        },
+
+// Salva profilo
+        async saveProfile() {
+            try {
+                await api.put('/settings/profile', this.userProfile);
+                alert('Profilo aggiornato con successo!');
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        },
+
+// Cambia password
+        async changePassword() {
+            if (this.passwordForm.new_password !== this.passwordForm.confirm_password) {
+                alert('Le password non corrispondono!');
+                return;
+            }
+
+            if (this.passwordForm.new_password.length < 8) {
+                alert('La password deve essere di almeno 8 caratteri!');
+                return;
+            }
+
+            try {
+                await api.post('/settings/password', this.passwordForm);
+                alert('Password modificata con successo!');
+
+                // Reset form
+                this.passwordForm = {
+                    current_password: '',
+                    new_password: '',
+                    confirm_password: '',
+                };
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        },
+
+// Salva preferenze
+        async savePreferences() {
+            try {
+                await api.put('/settings/preferences', this.userPreferences);
+                alert('Preferenze salvate!');
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        },
+
+// Elimina account
+        async confirmDeleteAccount() {
+            const password = prompt('Per confermare l\'eliminazione, inserisci la tua password:');
+
+            if (!password) return;
+
+            if (!confirm('Sei SICURO di voler eliminare il tuo account? Questa azione è IRREVERSIBILE!')) {
+                return;
+            }
+
+            try {
+                await api.delete('/settings/account', { password });
+                alert('Account eliminato');
+                window.location.href = './login';
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        },
+
     };
 }
 

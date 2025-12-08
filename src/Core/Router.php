@@ -120,11 +120,20 @@ class Router
             return $controller->$method($request);
         }
 
+//        if (is_string($handler) && str_contains($handler, '@')) {
+//            [$controllerClass, $method] = explode('@', $handler);
+//            $controllerClass = "FreelanceHub\\Controllers\\{$controllerClass}";
+//            $controller = new $controllerClass();
+//            return $controller->$method($request);
+//        }
+
         if (is_string($handler) && str_contains($handler, '@')) {
             [$controllerClass, $method] = explode('@', $handler);
             $controllerClass = "FreelanceHub\\Controllers\\{$controllerClass}";
             $controller = new $controllerClass();
-            return $controller->$method($request);
+
+            $params = array_values($request->getParams());
+            return $controller->$method($request, ...$params);
         }
 
         throw new \RuntimeException('Invalid route handler');

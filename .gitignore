@@ -1,0 +1,160 @@
+# ==========================================
+# FreelanceHub - Git Ignore File
+# ==========================================
+
+# ==========================================
+# CONFIGURAZIONE SENSIBILE
+# ==========================================
+.env
+.env.*
+!.env.example
+config/config.local.php
+config/database.local.php
+
+# ==========================================
+# DIPENDENZE
+# ==========================================
+/vendor/
+/node_modules/
+composer.lock
+package-lock.json
+yarn.lock
+
+# ==========================================
+# FILE CARICATI DAGLI UTENTI
+# ==========================================
+/public/uploads/*
+!/public/uploads/.gitkeep
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+
+# ==========================================
+# CACHE E TEMPORANEI
+# ==========================================
+/storage/cache/*
+!/storage/cache/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
+/var/cache/*
+/var/logs/*
+/tmp/*
+*.cache
+*.tmp
+
+# ==========================================
+# DATABASE
+# ==========================================
+*.sql
+*.sqlite
+*.db
+/database/backups/*
+!/database/backups/.gitkeep
+/database/*.sqlite
+
+# ==========================================
+# IDE E EDITOR
+# ==========================================
+# PhpStorm
+.idea/
+*.iml
+*.iws
+
+# VSCode
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# NetBeans
+nbproject/
+
+# Eclipse
+.project
+.buildpath
+.settings/
+
+# ==========================================
+# SISTEMA OPERATIVO
+# ==========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ==========================================
+# PHP
+# ==========================================
+*.log
+*.swp
+.phpunit.result.cache
+phpunit.xml
+!phpunit.xml.dist
+
+# ==========================================
+# FRONTEND
+# ==========================================
+# Build files
+/public/dist/*
+/public/build/*
+/public/assets/compiled/*
+
+# CSS preprocessors
+*.sass.map
+*.scss.map
+*.css.map
+
+# ==========================================
+# BACKUP E VERSIONI
+# ==========================================
+*.bak
+*.backup
+*.old
+*_backup
+*_old
+*.orig
+
+# ==========================================
+# DOCUMENTAZIONE GENERATA
+# ==========================================
+/docs/api/*
+/docs/coverage/*
+
+# ==========================================
+# TESTING
+# ==========================================
+/tests/coverage/*
+/coverage/*
+/.phpunit.cache
+
+# ==========================================
+# CI/CD
+# ==========================================
+.gitlab-ci-local/
+
+# ==========================================
+# ALTRO
+# ==========================================
+*.pem
+*.key
+*.crt
+*.p12
+/nbproject/private/
+error_log
+php_errors.log

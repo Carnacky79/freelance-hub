@@ -884,6 +884,7 @@ function app() {
                     break;
                 case 'projects':
                     await this.loadProjects();
+                    await this.loadClients();
                     break;
                 case 'calendar':
                     this.$nextTick(() => this.initCalendar());

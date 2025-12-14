@@ -128,6 +128,26 @@ function app() {
             new_password: '',
             confirm_password: '',
         },
+        // Projects
+        showProjectModal: false,
+        editingProject: null,
+        projectSearch: '',
+        projectStatusFilter: '',
+        projectClientFilter: '',
+        filteredProjects: [],
+
+        projectForm: {
+            name: '',
+            description: '',
+            client_id: '',
+            color: '#10B981',
+            status: 'planning',
+            start_date: '',
+            due_date: '',
+            estimated_hours: '',
+            budget: '',
+            is_billable: true,
+        },
 
         // filterClients() {
         //     let filtered = this.clients;
@@ -242,6 +262,162 @@ function app() {
             // TODO: Implementare modal dettaglio con statistiche
             alert(`Dettaglio cliente: ${client.name}\n\nFunzionalità in arrivo:\n- Task associati\n- Ore lavorate\n- Progetti attivi\n- Timeline attività`);
             console.log('Client details:', client);
+        },
+
+        /**
+         * Carica progetti
+         */
+        async loadProjects() {
+            try {
+                this.loading = true;
+                const response = await api.get('/projects');
+                this.projects = response.data;
+                this.filterProjects();
+            } catch (error) {
+                console.error('❌ Errore caricamento progetti:', error);
+                this.projects = [];
+                this.filteredProjects = [];
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        /**
+         * Filtra progetti
+         */
+        filterProjects() {
+            let filtered = Array.isArray(this.projects) ? [...this.projects] : [];
+
+            // Filtro ricerca testuale
+            if (this.projectSearch && this.projectSearch.trim() !== '') {
+                const search = this.projectSearch.toLowerCase();
+                filtered = filtered.filter(project =>
+                    (project.name && project.name.toLowerCase().includes(search)) ||
+                    (project.description && project.description.toLowerCase().includes(search)) ||
+                    (project.client_name && project.client_name.toLowerCase().includes(search))
+                );
+            }
+
+            // Filtro stato
+            if (this.projectStatusFilter && this.projectStatusFilter !== '') {
+                filtered = filtered.filter(project =>
+                    project.status === this.projectStatusFilter
+                );
+            }
+
+            // Filtro cliente
+            if (this.projectClientFilter && this.projectClientFilter !== '') {
+                filtered = filtered.filter(project =>
+                    project.client_id == this.projectClientFilter
+                );
+            }
+
+            this.filteredProjects = filtered;
+        },
+
+        /**
+         * Salva progetto
+         */
+        async saveProject() {
+            try {
+                if (this.editingProject) {
+                    await api.put(`/projects/${this.editingProject.id}`, this.projectForm);
+                } else {
+                    await api.post('/projects', this.projectForm);
+                }
+                this.showProjectModal = false;
+                this.resetProjectForm();
+                await this.loadProjects();
+                this.filterProjects();
+                alert('✅ Progetto salvato con successo');
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        },
+
+        /**
+         * Modifica progetto
+         */
+        editProject(project) {
+            this.editingProject = project;
+            this.projectForm = {
+                name: project.name,
+                description: project.description || '',
+                client_id: project.client_id || '',
+                color: project.color || '#10B981',
+                status: project.status || 'planning',
+                start_date: project.start_date || '',
+                due_date: project.due_date || '',
+                estimated_hours: project.estimated_hours || '',
+                budget: project.budget || '',
+                is_billable: project.is_billable !== undefined ? project.is_billable : true,
+            };
+            this.showProjectModal = true;
+        },
+
+        /**
+         * Elimina progetto
+         */
+        async deleteProject(id) {
+            if (!confirm('Sei sicuro di voler eliminare questo progetto? Verranno mantenuti i task associati.')) {
+                return;
+            }
+
+            try {
+                await api.delete(`/projects/${id}`);
+                await this.loadProjects();
+                this.filterProjects();
+                alert('✅ Progetto eliminato');
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        },
+
+        /**
+         * Reset form progetto
+         */
+        resetProjectForm() {
+            this.editingProject = null;
+            this.projectForm = {
+                name: '',
+                description: '',
+                client_id: '',
+                color: '#10B981',
+                status: 'planning',
+                start_date: '',
+                due_date: '',
+                estimated_hours: '',
+                budget: '',
+                is_billable: true,
+            };
+        },
+
+        /**
+         * Label stato progetto
+         */
+        projectStatusLabel(status) {
+            const labels = {
+                planning: 'In Pianificazione',
+                active: 'Attivo',
+                on_hold: 'In Pausa',
+                completed: 'Completato',
+                cancelled: 'Cancellato',
+            };
+            return labels[status] || 'Sconosciuto';
+        },
+
+        /**
+         * Classe CSS stato progetto
+         */
+        projectStatusClass(status) {
+            const classes = {
+                planning: 'bg-blue-100 text-blue-700',
+                active: 'bg-green-100 text-green-700',
+                on_hold: 'bg-yellow-100 text-yellow-700',
+                completed: 'bg-gray-100 text-gray-700',
+                cancelled: 'bg-red-100 text-red-700',
+            };
+            return classes[status] || 'bg-gray-100 text-gray-700';
         },
 
         // Page title

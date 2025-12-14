@@ -886,13 +886,379 @@
             </div>
 
             <!-- Projects -->
-            <div x-show="currentPage === 'projects'" class="animate-fade-in">
-                <div class="card text-center py-16">
-                    <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+            <!-- Projects -->
+            <div x-show="currentPage === 'projects'" class="space-y-6">
+                <!-- Header con ricerca e filtri -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-600">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Gestione Progetti</h1>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <span x-text="projects.length"></span> progetti totali
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <!-- Ricerca -->
+                            <div class="relative">
+                                <input
+                                        type="text"
+                                        x-model="projectSearch"
+                                        @input="filterProjects()"
+                                        placeholder="Cerca progetto..."
+                                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent w-64"
+                                >
+                                <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+
+                            <!-- Filtro Cliente -->
+                            <select
+                                    x-model="projectClientFilter"
+                                    @change="filterProjects()"
+                                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            >
+                                <option value="">Tutti i clienti</option>
+                                <template x-for="client in clients" :key="client.id">
+                                    <option :value="client.id" x-text="client.name"></option>
+                                </template>
+                            </select>
+
+                            <!-- Filtro Stato -->
+                            <select
+                                    x-model="projectStatusFilter"
+                                    @change="filterProjects()"
+                                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            >
+                                <option value="">Tutti gli stati</option>
+                                <option value="planning">In Pianificazione</option>
+                                <option value="active">Attivo</option>
+                                <option value="on_hold">In Pausa</option>
+                                <option value="completed">Completato</option>
+                                <option value="cancelled">Cancellato</option>
+                            </select>
+
+                            <!-- Nuovo Progetto -->
+                            <button
+                                    @click="showProjectModal = true; resetProjectForm();"
+                                    class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 whitespace-nowrap"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Nuovo Progetto
+                            </button>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Gestione Progetti</h3>
-                    <p class="text-gray-500 mb-6">Pagina in costruzione</p>
+                </div>
+
+                <!-- Loading State -->
+                <div x-show="loading" class="text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+                    <p class="mt-4 text-gray-600">Caricamento progetti...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!loading && filteredProjects.length === 0" class="bg-white rounded-lg shadow-sm p-12 text-center">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Nessun progetto trovato</h3>
+                    <p class="text-gray-600 mb-6">
+                        <span x-show="projectSearch || projectStatusFilter || projectClientFilter">Prova a modificare i filtri di ricerca</span>
+                        <span x-show="!projectSearch && !projectStatusFilter && !projectClientFilter">Inizia creando il tuo primo progetto</span>
+                    </p>
+                    <button
+                            @click="showProjectModal = true; resetProjectForm();"
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                    >
+                        Crea Primo Progetto
+                    </button>
+                </div>
+
+                <!-- Grid Progetti -->
+                <div x-show="!loading && filteredProjects.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <template x-for="project in filteredProjects" :key="project.id">
+                        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border-l-4 overflow-hidden"
+                             :style="`border-left-color: ${project.color || '#10B981'}`">
+
+                            <!-- Card Header -->
+                            <div class="p-6">
+                                <div class="flex items-start justify-between mb-4">
+                                    <!-- Icon & Nome -->
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <div class="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+                                             :style="`background: linear-gradient(135deg, ${project.color || '#10B981'} 0%, ${project.color || '#059669'} 100%)`">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="text-lg font-semibold text-gray-800 truncate" x-text="project.name"></h3>
+                                            <p x-show="project.client_name" class="text-sm text-gray-600 truncate" x-text="project.client_name"></p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Badge Stato -->
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ml-2"
+                                          :class="projectStatusClass(project.status)"
+                                          x-text="projectStatusLabel(project.status)">
+                        </span>
+                                </div>
+
+                                <!-- Descrizione -->
+                                <p x-show="project.description" class="text-sm text-gray-600 mb-4 line-clamp-2" x-text="project.description"></p>
+
+                                <!-- Date -->
+                                <div class="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                                    <div x-show="project.start_date" class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span x-text="formatDate(project.start_date)"></span>
+                                    </div>
+                                    <div x-show="project.due_date" class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span x-text="formatDate(project.due_date)"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Progresso -->
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Progresso</span>
+                                        <span class="font-medium text-gray-800" x-text="(project.progress || 0) + '%'"></span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-600 h-2 rounded-full transition-all"
+                                             :style="`width: ${project.progress || 0}%`"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Statistiche -->
+                                <div class="grid grid-cols-3 gap-3 mb-4">
+                                    <div class="bg-gray-50 rounded-lg p-3 text-center">
+                                        <p class="text-xs text-gray-600 mb-1">Task</p>
+                                        <p class="text-lg font-bold text-gray-800" x-text="project.open_tasks || 0"></p>
+                                    </div>
+                                    <div class="bg-gray-50 rounded-lg p-3 text-center">
+                                        <p class="text-xs text-gray-600 mb-1">Ore</p>
+                                        <p class="text-lg font-bold text-gray-800" x-text="(project.tracked_minutes ? Math.round(project.tracked_minutes / 60) : 0) + 'h'"></p>
+                                    </div>
+                                    <div x-show="project.budget" class="bg-gray-50 rounded-lg p-3 text-center">
+                                        <p class="text-xs text-gray-600 mb-1">Budget</p>
+                                        <p class="text-lg font-bold text-gray-800">€<span x-text="project.budget"></span></p>
+                                    </div>
+                                </div>
+
+                                <!-- Azioni -->
+                                <div class="flex gap-2">
+                                    <button
+                                            @click="editProject(project)"
+                                            class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                            title="Modifica"
+                                    >
+                                        <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                    <button
+                                            @click="deleteProject(project.id)"
+                                            class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                                            title="Elimina"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Modal Nuovo/Modifica Progetto -->
+                <div x-show="showProjectModal"
+                     x-cloak
+                     class="fixed inset-0 z-50 overflow-y-auto"
+                     style="display: none;">
+                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                        <!-- Overlay -->
+                        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+                             @click="showProjectModal = false"></div>
+
+                        <!-- Modal -->
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                            <!-- Header -->
+                            <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-xl font-semibold text-white">
+                                        <span x-text="editingProject ? 'Modifica Progetto' : 'Nuovo Progetto'"></span>
+                                    </h3>
+                                    <button @click="showProjectModal = false" class="text-white hover:text-gray-200">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Form -->
+                            <form @submit.prevent="saveProject()" class="px-6 py-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Nome Progetto -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Nome Progetto <span class="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                                type="text"
+                                                x-model="projectForm.name"
+                                                required
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                placeholder="Sito web aziendale"
+                                        >
+                                    </div>
+
+                                    <!-- Cliente -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
+                                        <select
+                                                x-model="projectForm.client_id"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        >
+                                            <option value="">Nessuno</option>
+                                            <template x-for="client in clients" :key="client.id">
+                                                <option :value="client.id" x-text="client.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+                                    <!-- Stato -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Stato</label>
+                                        <select
+                                                x-model="projectForm.status"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        >
+                                            <option value="planning">In Pianificazione</option>
+                                            <option value="active">Attivo</option>
+                                            <option value="on_hold">In Pausa</option>
+                                            <option value="completed">Completato</option>
+                                            <option value="cancelled">Cancellato</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Data Inizio -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Inizio</label>
+                                        <input
+                                                type="date"
+                                                x-model="projectForm.start_date"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        >
+                                    </div>
+
+                                    <!-- Scadenza -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Scadenza</label>
+                                        <input
+                                                type="date"
+                                                x-model="projectForm.due_date"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        >
+                                    </div>
+
+                                    <!-- Ore Stimate -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Ore Stimate</label>
+                                        <input
+                                                type="number"
+                                                x-model="projectForm.estimated_hours"
+                                                step="0.5"
+                                                min="0"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                placeholder="40"
+                                        >
+                                    </div>
+
+                                    <!-- Budget -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Budget (€)</label>
+                                        <input
+                                                type="number"
+                                                x-model="projectForm.budget"
+                                                step="0.01"
+                                                min="0"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                placeholder="5000.00"
+                                        >
+                                    </div>
+
+                                    <!-- Colore -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Colore Identificativo</label>
+                                        <div class="flex gap-2">
+                                            <input
+                                                    type="color"
+                                                    x-model="projectForm.color"
+                                                    class="w-16 h-10 border border-gray-300 rounded cursor-pointer"
+                                            >
+                                            <input
+                                                    type="text"
+                                                    x-model="projectForm.color"
+                                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm"
+                                                    placeholder="#10B981"
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <!-- Fatturabile -->
+                                    <div class="flex items-center">
+                                        <input
+                                                type="checkbox"
+                                                x-model="projectForm.is_billable"
+                                                class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                        >
+                                        <label class="ml-2 text-sm font-medium text-gray-700">Fatturabile</label>
+                                    </div>
+
+                                    <!-- Descrizione -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Descrizione</label>
+                                        <textarea
+                                                x-model="projectForm.description"
+                                                rows="3"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                placeholder="Descrizione del progetto..."
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                                    <button
+                                            type="button"
+                                            @click="showProjectModal = false"
+                                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                    >
+                                        Annulla
+                                    </button>
+                                    <button
+                                            type="submit"
+                                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                                    >
+                                        <span x-text="editingProject ? 'Salva Modifiche' : 'Crea Progetto'"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
 

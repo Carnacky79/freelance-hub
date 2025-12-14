@@ -105,10 +105,30 @@ class Request
         return array_merge($this->query, $this->body);
     }
 
-    public function getHeader(string $name, mixed $default = null): ?string
+    /**
+     * Ottiene un header HTTP
+     *
+     * @param string $name Nome header (es: 'X-CSRF-TOKEN')
+     * @param mixed $default Valore default
+     * @return string|null
+     */
+    public function getHeader($name, $default = null)
     {
-        $name = strtoupper(str_replace('-', '_', $name));
-        return $this->headers[$name] ?? $default;
+        // Normalizza nome header: X-CSRF-TOKEN -> HTTP_X_CSRF_TOKEN
+        $serverKey = 'HTTP_' . str_replace('-', '_', strtoupper($name));
+
+        // Controlla anche senza prefisso HTTP_ per alcuni header standard
+        if (isset($_SERVER[$serverKey])) {
+            return $_SERVER[$serverKey];
+        }
+
+        // Prova anche il nome diretto (per CONTENT_TYPE, CONTENT_LENGTH, ecc.)
+        $directKey = str_replace('-', '_', strtoupper($name));
+        if (isset($_SERVER[$directKey])) {
+            return $_SERVER[$directKey];
+        }
+
+        return $default;
     }
 
     public function getBearerToken(): ?string

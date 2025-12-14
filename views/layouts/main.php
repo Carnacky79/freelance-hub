@@ -47,6 +47,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="./css/dark-mode.css">
+
     <style>
         * { font-family: 'Inter', sans-serif; }
         [x-cloak] { display: none !important; }
@@ -145,34 +147,67 @@
             </div>
         </div>
 
+<!--        <nav class="flex-1 py-4">-->
+<!--            <a href="#" @click.prevent="currentPage = 'dashboard'" :class="{'active': currentPage === 'dashboard'}" class="sidebar-link">-->
+<!--                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>-->
+<!--                <span>Dashboard</span>-->
+<!--            </a>-->
+<!--            <a href="#" @click.prevent="currentPage = 'tasks'" :class="{'active': currentPage === 'tasks'}" class="sidebar-link">-->
+<!--                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>-->
+<!--                <span>Task</span>-->
+<!--                <span x-show="stats.tasks?.open > 0" class="ml-auto bg-white/20 text-white text-xs px-2 py-0.5 rounded-full" x-text="stats.tasks?.open"></span>-->
+<!--            </a>-->
+<!--            <a href="#" @click.prevent="currentPage = 'clients'" :class="{'active': currentPage === 'clients'}" class="sidebar-link">-->
+<!--                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>-->
+<!--                <span>Clienti</span>-->
+<!--            </a>-->
+<!--            <a href="#" @click.prevent="currentPage = 'projects'" :class="{'active': currentPage === 'projects'}" class="sidebar-link">-->
+<!--                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>-->
+<!--                <span>Progetti</span>-->
+<!--            </a>-->
+<!--            <a href="#" @click.prevent="currentPage = 'calendar'" :class="{'active': currentPage === 'calendar'}" class="sidebar-link">-->
+<!--                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>-->
+<!--                <span>Calendario</span>-->
+<!--            </a>-->
+<!--            <a href="#" @click.prevent="currentPage = 'time'" :class="{'active': currentPage === 'time'}" class="sidebar-link">-->
+<!--                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>-->
+<!--                <span>Time Tracking</span>-->
+<!--            </a>-->
+<!--            <div class="my-4 mx-4 border-t border-white/10"></div>-->
+<!--            <a href="#" @click.prevent="currentPage = 'integrations'" :class="{'active': currentPage === 'integrations'}" class="sidebar-link">-->
+<!--                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>-->
+<!--                <span>Integrazioni</span>-->
+<!--            </a>-->
+<!--        </nav>-->
+
         <nav class="flex-1 py-4">
-            <a href="#" @click.prevent="currentPage = 'dashboard'" :class="{'active': currentPage === 'dashboard'}" class="sidebar-link">
+            <a href="#" @click.prevent="goToPage('dashboard')" :class="{'active': currentPage === 'dashboard'}" class="sidebar-link">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 <span>Dashboard</span>
             </a>
-            <a href="#" @click.prevent="currentPage = 'tasks'" :class="{'active': currentPage === 'tasks'}" class="sidebar-link">
+            <a href="#" @click.prevent="goToPage('tasks')" :class="{'active': currentPage === 'tasks'}" class="sidebar-link">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                 <span>Task</span>
                 <span x-show="stats.tasks?.open > 0" class="ml-auto bg-white/20 text-white text-xs px-2 py-0.5 rounded-full" x-text="stats.tasks?.open"></span>
             </a>
-            <a href="#" @click.prevent="currentPage = 'clients'" :class="{'active': currentPage === 'clients'}" class="sidebar-link">
+            <a href="#" @click.prevent="goToPage('clients')" :class="{'active': currentPage === 'clients'}" class="sidebar-link">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span>Clienti</span>
             </a>
-            <a href="#" @click.prevent="currentPage = 'projects'" :class="{'active': currentPage === 'projects'}" class="sidebar-link">
+            <a href="#" @click.prevent="goToPage('projects')" :class="{'active': currentPage === 'projects'}" class="sidebar-link">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                 <span>Progetti</span>
             </a>
-            <a href="#" @click.prevent="currentPage = 'calendar'" :class="{'active': currentPage === 'calendar'}" class="sidebar-link">
+            <a href="#" @click.prevent="goToPage('calendar')" :class="{'active': currentPage === 'calendar'}" class="sidebar-link">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 <span>Calendario</span>
             </a>
-            <a href="#" @click.prevent="currentPage = 'time'" :class="{'active': currentPage === 'time'}" class="sidebar-link">
+            <a href="#" @click.prevent="goToPage('time')" :class="{'active': currentPage === 'time'}" class="sidebar-link">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span>Time Tracking</span>
             </a>
             <div class="my-4 mx-4 border-t border-white/10"></div>
-            <a href="#" @click.prevent="currentPage = 'integrations'" :class="{'active': currentPage === 'integrations'}" class="sidebar-link">
+            <a href="#" @click.prevent="goToPage('integrations')" :class="{'active': currentPage === 'integrations'}" class="sidebar-link">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
                 <span>Integrazioni</span>
             </a>
@@ -513,13 +548,340 @@
             </div>
 
             <!-- Clients -->
-            <div x-show="currentPage === 'clients'" class="animate-fade-in">
-                <div class="card text-center py-16">
-                    <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <div x-show="currentPage === 'clients'" class="space-y-6">
+                <!-- Header con ricerca e filtri -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-purple-600">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Gestione Clienti</h1>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <span x-text="clients.length"></span> clienti totali
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <!-- Ricerca -->
+                            <div class="relative">
+                                <input
+                                        type="text"
+                                        x-model="clientSearch"
+                                        @input="filterClients()"
+                                        placeholder="Cerca cliente..."
+                                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent w-64"
+                                >
+                                <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+
+                            <!-- Filtro Priorità -->
+                            <select
+                                    x-model="clientPriorityFilter"
+                                    @change="filterClients()"
+                                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            >
+                                <option value="">Tutte le priorità</option>
+                                <option value="urgent">Urgente</option>
+                                <option value="high">Alta</option>
+                                <option value="normal">Normale</option>
+                                <option value="low">Bassa</option>
+                                <option value="lowest">Molto bassa</option>
+                            </select>
+
+                            <!-- Nuovo Cliente -->
+                            <button
+                                    @click="showClientModal = true; resetClientForm();"
+                                    class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Nuovo Cliente
+                            </button>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Gestione Clienti</h3>
-                    <p class="text-gray-500 mb-6">Pagina in costruzione</p>
+                </div>
+
+                <!-- Loading State -->
+                <div x-show="loading" class="text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                    <p class="mt-4 text-gray-600">Caricamento clienti...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!loading && filteredClients.length === 0" class="bg-white rounded-lg shadow-sm p-12 text-center">
+                    <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Nessun cliente trovato</h3>
+                    <p class="text-gray-600 mb-6">
+                        <span x-show="clientSearch || clientPriorityFilter">Prova a modificare i filtri di ricerca</span>
+                        <span x-show="!clientSearch && !clientPriorityFilter">Inizia aggiungendo il tuo primo cliente</span>
+                    </p>
+                    <button
+                            @click="showClientModal = true; resetClientForm();"
+                            class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                    >
+                        Aggiungi Primo Cliente
+                    </button>
+                </div>
+
+                <!-- Grid Clienti -->
+                <div x-show="!loading && filteredClients.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <template x-for="client in filteredClients" :key="client.id">
+                        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border-l-4 overflow-hidden"
+                             :style="`border-left-color: ${client.color || '#8B5CF6'}`">
+
+                            <!-- Card Header -->
+                            <div class="p-6">
+                                <div class="flex items-start justify-between mb-4">
+                                    <!-- Avatar/Initial -->
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                                         :style="`background: linear-gradient(135deg, ${client.color || '#8B5CF6'} 0%, ${client.color || '#7C3AED'} 100%)`">
+                                        <span x-text="client.name ? client.name.charAt(0).toUpperCase() : '?'"></span>
+                                    </div>
+
+                                    <!-- Badge Priorità -->
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full"
+                                          :class="priorityClass(client.priority_level || 'normal')"
+                                          x-text="priorityLabel(client.priority_level || 'normal')">
+                        </span>
+                                </div>
+
+                                <!-- Nome Cliente -->
+                                <h3 class="text-lg font-semibold text-gray-800 mb-1" x-text="client.name"></h3>
+
+                                <!-- Azienda -->
+                                <p x-show="client.company" class="text-sm text-gray-600 mb-3">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                    <span x-text="client.company"></span>
+                                </p>
+
+                                <!-- Contatti -->
+                                <div class="space-y-2 mb-4">
+                                    <p x-show="client.email" class="text-sm text-gray-600 flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span x-text="client.email" class="truncate"></span>
+                                    </p>
+                                    <p x-show="client.phone" class="text-sm text-gray-600 flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                        </svg>
+                                        <span x-text="client.phone"></span>
+                                    </p>
+                                </div>
+
+                                <!-- Tariffa Oraria -->
+                                <div x-show="client.hourly_rate" class="bg-purple-50 rounded-lg p-3 mb-4">
+                                    <p class="text-xs text-purple-600 font-medium mb-1">Tariffa Oraria</p>
+                                    <p class="text-lg font-bold text-purple-700">
+                                        €<span x-text="client.hourly_rate"></span>/h
+                                    </p>
+                                </div>
+
+                                <!-- Statistiche rapide -->
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div class="bg-gray-50 rounded-lg p-3 text-center">
+                                        <p class="text-xs text-gray-600 mb-1">Task Attivi</p>
+                                        <p class="text-lg font-bold text-gray-800" x-text="client.active_tasks || 0"></p>
+                                    </div>
+                                    <div class="bg-gray-50 rounded-lg p-3 text-center">
+                                        <p class="text-xs text-gray-600 mb-1">Ore Totali</p>
+                                        <p class="text-lg font-bold text-gray-800" x-text="(client.total_hours || 0) + 'h'"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Azioni -->
+                                <div class="flex gap-2">
+                                    <button
+                                            @click="viewClientDetails(client)"
+                                            class="flex-1 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
+                                    >
+                                        Dettagli
+                                    </button>
+                                    <button
+                                            @click="editClient(client)"
+                                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                            title="Modifica"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                    <button
+                                            @click="deleteClient(client.id)"
+                                            class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                                            title="Elimina"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Modal Nuovo/Modifica Cliente -->
+                <div x-show="showClientModal"
+                     x-cloak
+                     class="fixed inset-0 z-50 overflow-y-auto"
+                     style="display: none;">
+                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                        <!-- Overlay -->
+                        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+                             @click="showClientModal = false"></div>
+
+                        <!-- Modal -->
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                            <!-- Header -->
+                            <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-xl font-semibold text-white">
+                                        <span x-text="editingClient ? 'Modifica Cliente' : 'Nuovo Cliente'"></span>
+                                    </h3>
+                                    <button @click="showClientModal = false" class="text-white hover:text-gray-200">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Form -->
+                            <form @submit.prevent="saveClient()" class="px-6 py-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Nome -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Nome Cliente <span class="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                                type="text"
+                                                x-model="clientForm.name"
+                                                required
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                placeholder="Mario Rossi"
+                                        >
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                        <input
+                                                type="email"
+                                                x-model="clientForm.email"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                placeholder="mario@example.com"
+                                        >
+                                    </div>
+
+                                    <!-- Telefono -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Telefono</label>
+                                        <input
+                                                type="tel"
+                                                x-model="clientForm.phone"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                placeholder="+39 333 1234567"
+                                        >
+                                    </div>
+
+                                    <!-- Azienda -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Azienda</label>
+                                        <input
+                                                type="text"
+                                                x-model="clientForm.company"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                placeholder="Nome Azienda S.r.l."
+                                        >
+                                    </div>
+
+                                    <!-- Tariffa Oraria -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Tariffa Oraria (€/h)</label>
+                                        <input
+                                                type="number"
+                                                x-model="clientForm.hourly_rate"
+                                                step="0.01"
+                                                min="0"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                placeholder="50.00"
+                                        >
+                                    </div>
+
+                                    <!-- Priorità -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Livello di Priorità</label>
+                                        <select
+                                                x-model="clientForm.priority_level"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        >
+                                            <option value="lowest">Molto Bassa</option>
+                                            <option value="low">Bassa</option>
+                                            <option value="normal">Normale</option>
+                                            <option value="high">Alta</option>
+                                            <option value="urgent">Urgente</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Colore -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Colore Identificativo</label>
+                                        <div class="flex gap-2">
+                                            <input
+                                                    type="color"
+                                                    x-model="clientForm.color"
+                                                    class="w-16 h-10 border border-gray-300 rounded cursor-pointer"
+                                            >
+                                            <input
+                                                    type="text"
+                                                    x-model="clientForm.color"
+                                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                                                    placeholder="#8B5CF6"
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <!-- Note -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Note</label>
+                                        <textarea
+                                                x-model="clientForm.notes"
+                                                rows="3"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                placeholder="Note aggiuntive sul cliente..."
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                                    <button
+                                            type="button"
+                                            @click="showClientModal = false"
+                                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                    >
+                                        Annulla
+                                    </button>
+                                    <button
+                                            type="submit"
+                                            class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                                    >
+                                        <span x-text="editingClient ? 'Salva Modifiche' : 'Crea Cliente'"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
 

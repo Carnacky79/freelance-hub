@@ -6,16 +6,59 @@
 // API Helper
 const api = {
     baseUrl: './api/v1',
+    _csrfToken: null,
+    _csrfPromise: null,
+
+    /**
+     * Inizializza CSRF token (con promise per evitare chiamate multiple)
+     */
+    async initCsrf() {
+        // Se già in caricamento, aspetta quella promise
+        if (this._csrfPromise) {
+            return this._csrfPromise;
+        }
+
+        // Se già caricato, restituiscilo
+        if (this._csrfToken) {
+            return this._csrfToken;
+        }
+
+        // Carica il token
+        this._csrfPromise = fetch('./api/test')
+            .then(r => r.json())
+            .then(data => {
+                this._csrfToken = data.csrf_token || '';
+                console.log('✅ CSRF token caricato:', this._csrfToken ? 'OK' : 'VUOTO');
+                this._csrfPromise = null;
+                return this._csrfToken;
+            })
+            .catch(e => {
+                console.error('❌ Errore caricamento CSRF token:', e);
+                this._csrfPromise = null;
+                return '';
+            });
+
+        return this._csrfPromise;
+    },
 
     async request(method, endpoint, data = null) {
+        // Assicura che abbiamo il CSRF token per modifiche
+        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+            await this.initCsrf();
+        }
+
         const options = {
             method,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': this.getCsrfToken(), // ⭐ AGGIUNGI QUESTO
             },
         };
+
+        // Aggiungi CSRF token per modifiche
+        if (this._csrfToken && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+            options.headers['X-CSRF-TOKEN'] = this._csrfToken;
+        }
 
         if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
             options.body = JSON.stringify(data);
@@ -25,20 +68,20 @@ const api = {
         const json = await response.json();
 
         if (!response.ok) {
-            throw new Error(json.message || 'Errore API');
+            // Se errore CSRF, prova a ricaricare il token (MAX 1 volta)
+            if (response.status === 403 && json.error && json.error.includes('CSRF') && !data?._csrfRetry) {
+                console.warn('🔄 CSRF token scaduto, ricarico...');
+                this._csrfToken = null;
+                this._csrfPromise = null;
+                // Marca il retry per evitare loop
+                const retryData = data ? { ...data, _csrfRetry: true } : { _csrfRetry: true };
+                return this.request(method, endpoint, retryData);
+            }
+
+            throw new Error(json.message || json.error || 'Errore API');
         }
 
         return json;
-    },
-
-    getCsrfToken() {
-        // Ottieni token dalla risposta /api/test
-        if (!this._csrfToken) {
-            fetch('./api/test')
-                .then(r => r.json())
-                .then(data => this._csrfToken = data.csrf_token);
-        }
-        return this._csrfToken || '';
     },
 
     get: (endpoint) => api.request('GET', endpoint),
@@ -47,8 +90,9 @@ const api = {
     delete: (endpoint) => api.request('DELETE', endpoint),
 };
 
+// Inizializza CSRF all'avvio (eager loading)
 document.addEventListener('DOMContentLoaded', () => {
-    api.getCsrfToken();
+    api.initCsrf();
 });
 
 // Main App Component
@@ -64,6 +108,9 @@ function app() {
         timeEntries: [],
         integrations: [],
         aiSuggestions: [],
+        clientSearch: '',
+        clientPriorityFilter: '',
+        filteredClients: [],
 
         settingsLoading: false,
         settingsSaved: false,
@@ -80,6 +127,121 @@ function app() {
             current_password: '',
             new_password: '',
             confirm_password: '',
+        },
+
+        // filterClients() {
+        //     let filtered = this.clients;
+        //
+        //     // Filtro per ricerca testuale
+        //     if (this.clientSearch) {
+        //         const search = this.clientSearch.toLowerCase();
+        //         filtered = filtered.filter(client =>
+        //             (client.name && client.name.toLowerCase().includes(search)) ||
+        //             (client.company && client.company.toLowerCase().includes(search)) ||
+        //             (client.email && client.email.toLowerCase().includes(search)) ||
+        //             (client.phone && client.phone.toLowerCase().includes(search))
+        //         );
+        //     }
+        //
+        //     // Filtro per priorità
+        //     if (this.clientPriorityFilter) {
+        //         filtered = filtered.filter(client =>
+        //             client.priority_level === this.clientPriorityFilter
+        //         );
+        //     }
+        //
+        //     this.filteredClients = filtered;
+        // },
+
+        filterClients() {
+            console.log('🔍 filterClients() chiamato');
+            console.log('  clients:', this.clients);
+            console.log('  clientSearch:', this.clientSearch);
+            console.log('  clientPriorityFilter:', this.clientPriorityFilter);
+
+            let filtered = this.clients;
+
+            // Filtro per ricerca testuale
+            if (this.clientSearch && this.clientSearch.trim() !== '') {
+                const search = this.clientSearch.toLowerCase();
+                filtered = filtered.filter(client =>
+                    (client.name && client.name.toLowerCase().includes(search)) ||
+                    (client.company && client.company.toLowerCase().includes(search)) ||
+                    (client.email && client.email.toLowerCase().includes(search)) ||
+                    (client.phone && client.phone.toLowerCase().includes(search))
+                );
+                console.log('  dopo ricerca:', filtered.length);
+            }
+
+            // Filtro per priorità
+            if (this.clientPriorityFilter && this.clientPriorityFilter !== '') {
+                filtered = filtered.filter(client =>
+                    client.priority_level === this.clientPriorityFilter
+                );
+                console.log('  dopo priorità:', filtered.length);
+            }
+
+            this.filteredClients = filtered;
+            console.log('✅ filteredClients impostato:', this.filteredClients.length);
+        },
+
+        /**
+         * Label priorità cliente
+         */
+        priorityLabel(priority) {
+            const labels = {
+                urgent: 'Urgente',
+                high: 'Alta',
+                normal: 'Normale',
+                low: 'Bassa',
+                lowest: 'Molto Bassa',
+            };
+            return labels[priority] || 'Normale';
+        },
+
+        /**
+         * Modifica cliente esistente
+         */
+        editClient(client) {
+            this.editingClient = client;
+            this.clientForm = {
+                name: client.name,
+                email: client.email || '',
+                phone: client.phone || '',
+                company: client.company || '',
+                priority_level: client.priority_level || 'normal',
+                hourly_rate: client.hourly_rate || '',
+                color: client.color || '#8B5CF6',
+                notes: client.notes || '',
+            };
+            this.showClientModal = true;
+        },
+
+        /**
+         * Elimina cliente
+         */
+        async deleteClient(id) {
+            if (!confirm('Sei sicuro di voler eliminare questo cliente? Verranno eliminate anche le associazioni con task e progetti.')) {
+                return;
+            }
+
+            try {
+                await api.delete(`/clients/${id}`);
+                await this.loadClients();
+                this.filterClients();
+                alert('✅ Cliente eliminato con successo');
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        },
+
+        /**
+         * Vista dettaglio cliente
+         */
+        async viewClientDetails(client) {
+            // TODO: Implementare modal dettaglio con statistiche
+            alert(`Dettaglio cliente: ${client.name}\n\nFunzionalità in arrivo:\n- Task associati\n- Ore lavorate\n- Progetti attivi\n- Timeline attività`);
+            console.log('Client details:', client);
         },
 
         // Page title
@@ -254,13 +416,39 @@ function app() {
         },
 
         // Clients
+        // async loadClients() {
+        //     try {
+        //         this.loading = true;
+        //         const response = await api.get('/clients');
+        //         this.clients = response.data;
+        //         this.filterClients(); // <-- AGGIUNGI QUESTA RIGA
+        //     } catch (error) {
+        //         console.error('Errore caricamento clienti:', error);
+        //     } finally {
+        //         this.loading = false;
+        //     }
+        // },
+
         async loadClients() {
             try {
                 this.loading = true;
                 const response = await api.get('/clients');
+
+                console.log('📦 Response:', response);
+                console.log('📦 Response.data:', response.data);
+
+                // FIX: response.data contiene l'array
                 this.clients = response.data;
+
+                console.log('✅ this.clients popolato con:', this.clients.length, 'elementi');
+
+                this.filterClients();
+
+                console.log('✅ filteredClients dopo filtro:', this.filteredClients.length);
             } catch (error) {
-                console.error('Errore caricamento clienti:', error);
+                console.error('❌ Errore caricamento clienti:', error);
+                this.clients = [];
+                this.filteredClients = [];
             } finally {
                 this.loading = false;
             }
@@ -276,6 +464,7 @@ function app() {
                 this.showClientModal = false;
                 this.resetClientForm();
                 await this.loadClients();
+                this.filterClients(); // <-- ASSICURATI CHE CI SIA
             } catch (error) {
                 alert('Errore: ' + error.message);
             }
@@ -290,7 +479,8 @@ function app() {
                 company: '',
                 priority_level: 'normal',
                 hourly_rate: '',
-                color: '#3B82F6',
+                color: '#8B5CF6',
+                notes: '',
             };
         },
 
@@ -548,22 +738,59 @@ function app() {
 // Carica dati utente
         async loadUserSettings() {
             try {
+                this.settingsLoading = true;
                 const response = await api.get('/settings');
+
+                console.log('📥 Dati ricevuti da server:', response.data);
+
+                // Carica profilo
                 this.userProfile = {
-                    name: response.data.name,
-                    email: response.data.email,
+                    name: response.data.name || '',
+                    email: response.data.email || '',
                     timezone: response.data.timezone || 'Europe/Rome',
                 };
 
-                // Carica preferenze se presenti
+                // Carica preferenze - FIX: reset prima dei default
+                let loadedPreferences = {
+                    email_notifications: true,
+                    ai_suggestions: true,
+                    dark_mode: false,
+                };
+
                 if (response.data.preferences) {
-                    const prefs = typeof response.data.preferences === 'string'
-                        ? JSON.parse(response.data.preferences)
-                        : response.data.preferences;
-                    this.userPreferences = { ...this.userPreferences, ...prefs };
+                    try {
+                        // Parse se è stringa JSON
+                        const prefs = typeof response.data.preferences === 'string'
+                            ? JSON.parse(response.data.preferences)
+                            : response.data.preferences;
+
+                        console.log('📝 Preferenze dal DB:', prefs);
+
+                        // Merge con valori caricati (sovrascrive i default)
+                        loadedPreferences = {
+                            email_notifications: prefs.email_notifications ?? true,
+                            ai_suggestions: prefs.ai_suggestions ?? true,
+                            dark_mode: prefs.dark_mode ?? false,
+                        };
+                    } catch (e) {
+                        console.error('Errore parsing preferenze:', e);
+                    }
                 }
+
+                // Imposta le preferenze caricate
+                this.userPreferences = loadedPreferences;
+
+                console.log('✅ Preferenze caricate:', this.userPreferences);
+
+                // Applica tema scuro se attivo
+                if (this.userPreferences.dark_mode) {
+                    document.documentElement.classList.add('dark');
+                }
+
             } catch (error) {
-                console.error('Errore caricamento settings:', error);
+                console.error('❌ Errore caricamento settings:', error);
+            } finally {
+                this.settingsLoading = false;
             }
         },
 
